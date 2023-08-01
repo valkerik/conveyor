@@ -27,9 +27,9 @@ public class ConveyorService {
         List<LoanOfferDTO> offersDTO = new ArrayList<>();
         BigDecimal tempMonthlyPayment, tempTotalAmount, tempRate;
 
-        for (int i = 0 ; i < 4; i++){
+        for (int i = 0; i < 4; i++) {
 
-            LoanOfferDTO currentOffer= new LoanOfferDTO();
+            LoanOfferDTO currentOffer = new LoanOfferDTO();
             currentOffer.setTerm(requestDTO.getTerm());
             currentOffer.setRequestedAmount(requestDTO.getAmount());
             currentOffer.setApplicationId((long) i);
@@ -41,20 +41,21 @@ public class ConveyorService {
         tempTotalAmount = tempMonthlyPayment.multiply(BigDecimal.valueOf(requestDTO.getTerm()));
         calcLoanOffer(offersDTO.get(0), false, false, baseRate, tempMonthlyPayment, tempTotalAmount);
 
-        tempRate = baseRate.subtract(BigDecimal.valueOf(2));
-        tempMonthlyPayment = INSURANCE_BASE.add(INSURANCE_PERCENT.multiply(requestDTO.getAmount()));
-        tempMonthlyPayment = this.calcMonthlyPay(requestDTO.getAmount().add(tempMonthlyPayment), requestDTO.getTerm(), tempRate);
-        tempTotalAmount = tempMonthlyPayment.multiply(BigDecimal.valueOf(requestDTO.getTerm()));
-        calcLoanOffer(offersDTO.get(2), false, true, tempRate, tempMonthlyPayment, tempTotalAmount);
-
         tempRate = baseRate.subtract(BigDecimal.ONE);
         tempMonthlyPayment = this.calcMonthlyPay(requestDTO.getAmount(), requestDTO.getTerm(), tempRate);
         tempTotalAmount = tempMonthlyPayment.multiply(BigDecimal.valueOf(requestDTO.getTerm()));
         calcLoanOffer(offersDTO.get(1), true, false, tempRate, tempMonthlyPayment, tempTotalAmount);
 
+        tempRate = baseRate.subtract(BigDecimal.valueOf(2));
+        tempMonthlyPayment = INSURANCE_PERCENT.multiply(INSURANCE_BASE.add(requestDTO.getAmount()));
+        tempMonthlyPayment = this.calcMonthlyPay((tempMonthlyPayment), requestDTO.getTerm(), tempRate);
+        tempTotalAmount = tempMonthlyPayment.multiply(BigDecimal.valueOf(requestDTO.getTerm()));
+        calcLoanOffer(offersDTO.get(2), false, true, tempRate, tempMonthlyPayment, tempTotalAmount);
+
+
         tempRate = baseRate.subtract(BigDecimal.valueOf(3));
-        tempMonthlyPayment = INSURANCE_BASE.add(INSURANCE_PERCENT.multiply(requestDTO.getAmount()));
-        tempMonthlyPayment = this.calcMonthlyPay(requestDTO.getAmount().add(tempMonthlyPayment), requestDTO.getTerm(), tempRate);
+        tempMonthlyPayment = INSURANCE_PERCENT.multiply(INSURANCE_BASE.add(requestDTO.getAmount()));
+        tempMonthlyPayment = this.calcMonthlyPay((tempMonthlyPayment), requestDTO.getTerm(), tempRate);
         tempTotalAmount = tempMonthlyPayment.multiply(BigDecimal.valueOf(requestDTO.getTerm()));
         calcLoanOffer(offersDTO.get(3), true, true, tempRate, tempMonthlyPayment, tempTotalAmount);
 
@@ -71,7 +72,6 @@ public class ConveyorService {
                 .multiply(rate)
                 .divide(rate.add(BigDecimal.ONE).pow(term).subtract(BigDecimal.ONE), MathContext.DECIMAL64)
                 .multiply(amount);
-
     }
 
     public CreditDTO calculationCredit(ScoringDataDTO scoringDataDTO) throws ScoreDenyedException {
@@ -85,9 +85,9 @@ public class ConveyorService {
             creditDTO.setRate(rate);
             creditDTO.setMonthlyPayment(calcMonthlyPay(scoringDataDTO.getAmount(), scoringDataDTO.getTerm(), rate));
             creditDTO.setPaymentSchedule(calcPaymentSchedule(scoringDataDTO.getAmount(), scoringDataDTO.getTerm(),
-                                                rate, creditDTO.getMonthlyPayment()));
-            creditDTO.setPsk(calculatePsk(scoringDataDTO.getAmount(), scoringDataDTO.getTerm(), rate,
-                                               creditDTO.getMonthlyPayment(), creditDTO.getPaymentSchedule()));
+                    rate, creditDTO.getMonthlyPayment()));
+            creditDTO.setPsk(calculatePsk(scoringDataDTO.getAmount(), scoringDataDTO.getTerm(),
+                    creditDTO.getPaymentSchedule()));
             System.out.println(creditDTO);
         } catch (ScoreDenyedException ex) {
             log.info("The scoring was disrupted, which led to the interruption of the calculation. {} ", scoringDataDTO);
@@ -95,9 +95,8 @@ public class ConveyorService {
         return creditDTO;
     }
 
-    private BigDecimal calculatePsk(BigDecimal amount, Integer term,
-                                    BigDecimal rate, BigDecimal monthlyPayment,
-                                    List<PaymentScheduleElement> paymentSchedule) {
+    BigDecimal calculatePsk(BigDecimal amount, Integer term,
+                            List<PaymentScheduleElement> paymentSchedule) {
         log.info("Method Calculate PSK run");
 
         BigDecimal payAmo = paymentSchedule.stream()
@@ -115,9 +114,9 @@ public class ConveyorService {
     }
 
     public List<PaymentScheduleElement> calcPaymentSchedule(BigDecimal loanAmount,
-                                                               Integer term,
-                                                               BigDecimal rate,
-                                                               BigDecimal monthlyPayment) {
+                                                            Integer term,
+                                                            BigDecimal rate,
+                                                            BigDecimal monthlyPayment) {
         log.info("calculating payment schedule");
         BigDecimal monthRate = rate.divide(BigDecimal.valueOf(1200));
         BigDecimal currLoanAmount = loanAmount;
@@ -154,8 +153,7 @@ public class ConveyorService {
     }
 
 
-
-    public void preScoring (LoanApplicationRequestDTO requestDTO){
+    public void preScoring(LoanApplicationRequestDTO requestDTO) {
         log.info("PreScoring start {}", requestDTO);
         if (!NAME_REGEXP.test(requestDTO.getFirstName())) {  // валидация имени
             throw new IllegalArgumentException("First name is illegal, should contain 2-30 latin letters, current: %s"
@@ -196,8 +194,8 @@ public class ConveyorService {
         log.info("Process preScoring finished successfully");
     }
 
-    private void calcLoanOffer (LoanOfferDTO curr, boolean isSalary, boolean isInsurance,
-                                BigDecimal rate, BigDecimal monthlyPayment, BigDecimal totalAmount ){
+    private void calcLoanOffer(LoanOfferDTO curr, boolean isSalary, boolean isInsurance,
+                               BigDecimal rate, BigDecimal monthlyPayment, BigDecimal totalAmount) {
         curr.setIsSalaryClient(isSalary);
         curr.setIsInsuranceEnabled(isInsurance);
         curr.setRate(rate);
@@ -205,36 +203,36 @@ public class ConveyorService {
         curr.setTotalAmount(totalAmount.setScale(2, RoundingMode.HALF_UP));
     }
 
-    public BigDecimal createScore (ScoringDataDTO scoringDataDTO) throws ScoreDenyedException {
-            log.info("scoring started");
-            try {
-                BigDecimal tempRate = baseRate;
-                tempRate = tempRate.add(ScoringUtils.getEmploymentRate(scoringDataDTO.getEmployment().getEmploymentStatus()));
-                tempRate = tempRate.add(ScoringUtils.getPositionRate(scoringDataDTO.getEmployment().getPosition()));
-                if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).compareTo(scoringDataDTO.getAmount()) != 1) {
-                    throw new ScoreDenyedException("Denied by salary amount");
-                }
-                tempRate = tempRate.add(ScoringUtils.getMaritalStatusRate(scoringDataDTO.getMaritalStatus()));
-
-                if (scoringDataDTO.getDependentAmount() > 1) {
-                    tempRate = tempRate.add(BigDecimal.ONE);
-                }
-
-                int age = Period.between(scoringDataDTO.getBirthDate(), LocalDate.now()).getYears();
-                tempRate = tempRate.add(ScoringUtils.getGenderAndAgeRate(scoringDataDTO.getGender(), age));
-
-                if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) {
-                    throw new ScoreDenyedException("Denied by total experience");
-                }
-                if (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3) {
-                    throw new ScoreDenyedException("Denied by current experience");
-                }
-                log.info("scoring finished successfully");
-                return tempRate;
-            } catch (ScoreDenyedException ex){
-                log.info("scoring interrupted");
-                log.info(ex.getMessage());
-                throw ex;
+    public BigDecimal createScore(ScoringDataDTO scoringDataDTO) throws ScoreDenyedException {
+        log.info("scoring started");
+        try {
+            BigDecimal tempRate = baseRate;
+            tempRate = tempRate.add(ScoringUtils.getEmploymentRate(scoringDataDTO.getEmployment().getEmploymentStatus()));
+            tempRate = tempRate.add(ScoringUtils.getPositionRate(scoringDataDTO.getEmployment().getPosition()));
+            if (scoringDataDTO.getEmployment().getSalary().multiply(BigDecimal.valueOf(20)).compareTo(scoringDataDTO.getAmount()) != 1) {
+                throw new ScoreDenyedException("Denied by salary amount");
             }
+            tempRate = tempRate.add(ScoringUtils.getMaritalStatusRate(scoringDataDTO.getMaritalStatus()));
+
+            if (scoringDataDTO.getDependentAmount() > 1) {
+                tempRate = tempRate.add(BigDecimal.ONE);
+            }
+
+            int age = Period.between(scoringDataDTO.getBirthDate(), LocalDate.now()).getYears();
+            tempRate = tempRate.add(ScoringUtils.getGenderAndAgeRate(scoringDataDTO.getGender(), age));
+
+            if (scoringDataDTO.getEmployment().getWorkExperienceTotal() < 12) {
+                throw new ScoreDenyedException("Denied by total experience");
+            }
+            if (scoringDataDTO.getEmployment().getWorkExperienceCurrent() < 3) {
+                throw new ScoreDenyedException("Denied by current experience");
+            }
+            log.info("scoring finished successfully");
+            return tempRate;
+        } catch (ScoreDenyedException ex) {
+            log.info("scoring interrupted");
+            log.info(ex.getMessage());
+            throw ex;
+        }
     }
 }

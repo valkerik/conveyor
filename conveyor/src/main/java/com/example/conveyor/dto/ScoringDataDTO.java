@@ -11,6 +11,7 @@ import java.time.LocalDate;
 
 @Getter @Setter
 @AllArgsConstructor @NoArgsConstructor
+@Builder
 @ToString
 public class ScoringDataDTO {
     private BigDecimal amount;

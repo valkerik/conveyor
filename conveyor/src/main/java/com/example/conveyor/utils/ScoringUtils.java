@@ -10,36 +10,47 @@ import java.math.BigDecimal;
 
 public class ScoringUtils {
 
-    public static BigDecimal getEmploymentRate (EmploymentStatus status) throws ScoreDenyedException {
-        switch (status){
-            case SELFEMPLOYED: return BigDecimal.ONE;
-            case EMPLOYED: return BigDecimal.ZERO;
-            case BUSINESSOWNER: return new BigDecimal(String.valueOf(3));
-            case UNEMPLOYED: throw new ScoreDenyedException("Denied by employment status");
-            default: throw new ScoreDenyedException("Unknown Employed status");
+    public static BigDecimal getEmploymentRate(EmploymentStatus status) throws ScoreDenyedException {
+        switch (status) {
+            case SELFEMPLOYED:
+                return BigDecimal.ONE;
+            case EMPLOYED:
+                return BigDecimal.ZERO;
+            case BUSINESSOWNER:
+                return new BigDecimal(String.valueOf(3));
+            case UNEMPLOYED:
+                throw new ScoreDenyedException("Denied by employment status");
+            default:
+                throw new ScoreDenyedException("Unknown Employed status");
         }
     }
 
-    public static BigDecimal getPositionRate (Position position){
-        switch (position){
-            case MID_MANAGER: return new BigDecimal(-2);
-            case TOPMANAGER: return new BigDecimal(-4);
-            default: return BigDecimal.ZERO;
+    public static BigDecimal getPositionRate(Position position) {
+        switch (position) {
+            case MID_MANAGER:
+                return new BigDecimal(-2);
+            case TOPMANAGER:
+                return new BigDecimal(-4);
+            default:
+                return BigDecimal.ZERO;
         }
     }
 
-    public static BigDecimal getMaritalStatusRate (MaritalStatus maritalStatus){
-        switch (maritalStatus){
-            case MARRIED: return new BigDecimal(-3);
-            case DIVORCED: return BigDecimal.ONE;
-            default: return BigDecimal.ZERO;
+    public static BigDecimal getMaritalStatusRate(MaritalStatus maritalStatus) {
+        switch (maritalStatus) {
+            case MARRIED:
+                return new BigDecimal(-3);
+            case DIVORCED:
+                return BigDecimal.ONE;
+            default:
+                return BigDecimal.ZERO;
         }
     }
-
 
 
     public static BigDecimal getGenderAndAgeRate(Gender gender, int age) throws ScoreDenyedException {
-        if(age < 20 || age > 60)  throw new ScoreDenyedException("The applicant does not meet the age requirements. Denied");
+        if (age < 20 || age > 60)
+            throw new ScoreDenyedException("The applicant does not meet the age requirements. Denied");
         switch (gender) {
             case MALE:
                 return (age >= 30 && age <= 55) ? BigDecimal.valueOf(-3) : BigDecimal.ZERO;

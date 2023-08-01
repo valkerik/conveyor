@@ -14,9 +14,6 @@ public class PreScoringUtils {
     public static final Integer MIN_TERM = 6;
     public static final Long MIN_AGE = 18L;
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final  BigDecimal INSURANCE_PERCENT = BigDecimal.valueOf(.05);
-    public static final BigDecimal SALARY_CLIENT_DISCOUNT =BigDecimal.valueOf(1);
-    public static final BigDecimal DISCOUNT = BigDecimal.valueOf(4);
-    public static final  BigDecimal INSURANCE_BASE = BigDecimal.valueOf(10000);
-    public static final  BigDecimal BASE_LOAN = BigDecimal.valueOf(100000);
+    public static final BigDecimal INSURANCE_PERCENT = BigDecimal.valueOf(1);
+    public static final BigDecimal INSURANCE_BASE = BigDecimal.valueOf(10000);
 }
